@@ -2,6 +2,7 @@ import pytest
 import torch
 
 from Models.MLP import MCDropout_MLP
+
 def test_MCDropout_MLP_output_shape():
     inp = 10
     out = 2
