@@ -106,7 +106,7 @@ class BayesianCL(SupervisedTemplate):
     
     def classification_mean_std(self):
         output_list = []
-        for _ in range(self.num_test_repeats):
+        for _ in range(self.num_test_repeats):     
             output_list.append(self.forward())
         assert(len(output_list[0][0])==10)
         z = torch.cat(output_list,-1).view(-1, len(output_list[0][0])).split(self.num_test_repeats)

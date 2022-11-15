@@ -24,7 +24,7 @@ criterion = nn.CrossEntropyLoss()
 # Continual learning strategy
 ewc = EWCPlugin(ewc_lambda=100, mode='separate', decay_factor=None, keep_importance_data=False)
 cl_strategy = BayesianCL(
-    model, optimizer, criterion, plugins=[ewc],train_mb_size=32, train_epochs=4,
+    model, optimizer, criterion, plugins=[ewc],train_mb_size=32, train_epochs=1,
     eval_mb_size=32, device=device)
 
 # train and test loop over the stream of experiences
