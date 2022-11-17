@@ -1,0 +1,44 @@
+		EWC DISCOUNT = 1
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9227
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9122
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.8601
+
+		RUN 2
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.8926
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9014
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.8848
+
+		RUN 3
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9153
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9098
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.8928
+
+
+		EWC DISCOUNT = 0.8
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9171
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9012
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.8834
+
+
+
+
+		BTFR EWC DICOUNT = 1.0 
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9444
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9047
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.9395
+
+		run 2
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9468
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9039
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.9014
+
+		run 3
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9474
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9129
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.8922
+
+
+		BTFR EWC DISCOUNT = 0.8
+        Top1_Acc_Stream/eval_phase/test_stream/Task000 = 0.9440
+        Top1_Acc_Stream/eval_phase/test_stream/Task001 = 0.9042
+        Top1_Acc_Stream/eval_phase/test_stream/Task002 = 0.9038
