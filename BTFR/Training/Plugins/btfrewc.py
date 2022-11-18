@@ -47,12 +47,14 @@ class BTFREWCPlugin(EWCPlugin):
                 set to be True.
         """
         super().__init__(ewc_lambda, mode,decay_factor,keep_importance_data)
-
+        #NEW ADDITION
+        self.NO_UPDATE = True
     def after_training_exp(self, strategy, **kwargs):
         """
         Compute importances of parameters after each experience.
         """
         exp_counter = strategy.clock.train_exp_counter
+        #NEW ADDITION
         importances = self.compute_importances(
             strategy.model,
             strategy._criterion,
@@ -61,6 +63,7 @@ class BTFREWCPlugin(EWCPlugin):
             strategy.device,
             strategy.train_mb_size,
             strategy.certainty,
+            strategy.lower_threshold,
             strategy.beta
         )
         self.update_importances(importances, exp_counter)
@@ -70,7 +73,7 @@ class BTFREWCPlugin(EWCPlugin):
             del self.saved_params[exp_counter - 1]
 
     def compute_importances(
-        self, model, criterion, optimizer, dataset, device, batch_size, certainty, beta
+        self, model, criterion, optimizer, dataset, device, batch_size, certainty, threshold,beta
     ):
         """
         Compute EWC importance matrix for each parameter
@@ -93,6 +96,13 @@ class BTFREWCPlugin(EWCPlugin):
 
         # list of list
         importances = zerolike_params_dict(model)
+        #NEW ADDITION
+        if certainty < threshold:
+            self.NO_UPDATE = True
+            return importances
+        else:
+            self.NO_UPDATE = False
+        
         dataloader = DataLoader(dataset, batch_size=batch_size)
         for i, batch in enumerate(dataloader):
             # get only input, target and task_id from the batch
@@ -109,6 +119,7 @@ class BTFREWCPlugin(EWCPlugin):
             ):
                 assert k1 == k2
                 if p.grad is not None:
+                    #NEW ADDITION
                     imp += (p.grad.data.clone().pow(2)) * (certainty**2 * beta)
 
         # average over mini batch length
@@ -123,30 +134,31 @@ class BTFREWCPlugin(EWCPlugin):
         Update importance for each parameter based on the currently computed
         importances.
         """
+        #NEW ADDITION
+        if not self.NO_UPDATE:         
+            if self.mode == "separate" or t == 0:
+                self.importances[t] = importances
+            elif self.mode == "online":
+                for (k1, old_imp), (k2, curr_imp) in itertools.zip_longest(
+                    self.importances[t - 1], importances, fillvalue=(None, None),
+                ):
+                    # Add new module importances to the importances value (New head)
+                    if k1 is None:
+                        self.importances[t].append((k2, curr_imp))
+                        continue
 
-        if self.mode == "separate" or t == 0:
-            self.importances[t] = importances
-        elif self.mode == "online":
-            for (k1, old_imp), (k2, curr_imp) in itertools.zip_longest(
-                self.importances[t - 1], importances, fillvalue=(None, None),
-            ):
-                # Add new module importances to the importances value (New head)
-                if k1 is None:
-                    self.importances[t].append((k2, curr_imp))
-                    continue
+                    assert k1 == k2, "Error in importance computation."
+                    #NEW ADDITION
+                    self.importances[t].append(
+                        (k1, (self.decay_factor * (old_imp*(t-1) + curr_imp)/t))
+                    )
 
-                assert k1 == k2, "Error in importance computation."
+                # clear previous parameter importances
+                if t > 0 and (not self.keep_importance_data):
+                    del self.importances[t - 1]
 
-                self.importances[t].append(
-                    (k1, (self.decay_factor * (old_imp*(t-1) + curr_imp)/t))
-                )
-
-            # clear previous parameter importances
-            if t > 0 and (not self.keep_importance_data):
-                del self.importances[t - 1]
-
-        else:
-            raise ValueError("Wrong EWC mode.")
+            else:
+                raise ValueError("Wrong EWC mode.")
 
 
 ParamDict = Dict[str, Tensor]

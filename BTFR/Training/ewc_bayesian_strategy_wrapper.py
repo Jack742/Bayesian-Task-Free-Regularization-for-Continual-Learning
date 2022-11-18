@@ -115,6 +115,7 @@ class EWCBayesianCL(SupervisedTemplate):
         self.task_type = task_type
         self.num_test_repeats = num_test_repeats
         self.beta = beta
+        self.lower_threshold = 0.7 #Below this, we don't update importances
         
     
     def classification_mean_std(self):
