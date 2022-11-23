@@ -31,7 +31,7 @@ from avalanche.models.generator import MlpVAE, VAE_loss
 from avalanche.logging import InteractiveLogger
 from avalanche.benchmarks import CLExperience, CLStream
 from .utils import enable_dropout
-from .Plugins.btfrewc import BTFREWCPlugin
+from .Plugins import BTFREWCPlugin
 
 ExpSequence = Iterable[CLExperience]
 
@@ -49,7 +49,7 @@ class EWCBayesianCL(SupervisedTemplate):
         criterion,
         plugins: Optional[List[SupervisedPlugin]]=None,
         task_type = 'classification',
-        num_test_repeats = 3,
+        num_test_repeats = 5,
         train_mb_size: int = 1,
         train_epochs: int = 1,
         eval_mb_size: int = None,

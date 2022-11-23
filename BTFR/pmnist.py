@@ -4,14 +4,18 @@ from torch.optim import SGD
 import pickle
 from avalanche.benchmarks.classic import PermutedMNIST
 from avalanche.models import SimpleMLP
-from avalanche.training.plugins import EWCPlugin, MASPlugin
-#from avalanche.training import Naive, EWC
-from Training import BayesianCL, EWCBayesianCL
+from avalanche.training.plugins import EWCPlugin
+#from avalanche.training import MAS#Naive, EWC
+from Training import MASPlugin
+from Training import BayesianCL, EWCBayesianCL, MASBayesianCL
+from Training.utils import *
 
 device = torch.device("cuda:0" if torch.cuda.is_available else "cpu")
+num_model_reruns = 5
+
+torch.manual_seed(123456)
 
 model = SimpleMLP(num_classes=10)
-
 # CL Benchmark Creation
 perm_mnist = PermutedMNIST(n_experiences=5)
 train_stream = perm_mnist.train_stream
@@ -21,23 +25,34 @@ test_stream = perm_mnist.test_stream
 optimizer = SGD(model.parameters(), lr=0.001, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 
-# Continual learning strategy
-ewc = EWCPlugin(ewc_lambda=100, mode='online', decay_factor=1.0, keep_importance_data=False)
-cl_strategy = BayesianCL(
-    model, optimizer, criterion, plugins=[ewc],train_mb_size=1, train_epochs=1,
-    eval_mb_size=1, device=device)
+ewc = EWCPlugin(ewc_lambda=100, mode='online', decay_factor=0.9, keep_importance_data=False)
+mas = MASPlugin()
 
-# cl_strategy = EWCBayesianCL(
-#     model, optimizer, criterion, train_mb_size=1, train_epochs=1,
-#     eval_mb_size=1, device=device)
-#train and test loop over the stream of experiences
-results = []
-for train_exp in train_stream:
-    cl_strategy.train(train_exp)
-    results.append(cl_strategy.eval(test_stream))
+strategies = {"ewc_base":BayesianCL(
+     model, optimizer, criterion, plugins=[ewc],num_test_repeats=num_model_reruns,train_mb_size=1, train_epochs=1,
+     eval_mb_size=1, device=device),
+                "btfr_ewc":EWCBayesianCL(
+     model, optimizer, criterion, train_mb_size=1,num_test_repeats=num_model_reruns, train_epochs=1,
+     eval_mb_size=1, device=device),
+                "mas_base": BayesianCL(model, optimizer, criterion, plugins=[mas],num_test_repeats=num_model_reruns,train_mb_size=1, train_epochs=1,
+    eval_mb_size=1, device=device),
+                "btfr_mas":MASBayesianCL(model, optimizer, criterion, num_test_repeats=num_model_reruns,train_mb_size=1, train_epochs=1,
+    eval_mb_size=1, device=device)     
+     }
 
-with open('Results/pmnist/ewc_online_no_labels', 'wb') as f:
-    pickle.dump(results, f)
+
+for cls in strategies.keys():
+    cl_strategy = strategies[cls]
+    #reinitialise parameters
+    model.apply(init_params())
+    results = []
+
+    for train_exp in train_stream:
+        cl_strategy.train(train_exp)
+        results.append(cl_strategy.eval(test_stream))
+
+    with open(f'Results/pmnist/cls', 'wb') as f:
+        pickle.dump(results, f)
 
 """
         ewc_lambda: float,

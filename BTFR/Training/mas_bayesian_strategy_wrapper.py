@@ -31,9 +31,11 @@ from avalanche.models.generator import MlpVAE, VAE_loss
 from avalanche.logging import InteractiveLogger
 from avalanche.benchmarks import CLExperience, CLStream
 from .utils import enable_dropout
+from .Plugins import BTFRMASPlugin
+
 ExpSequence = Iterable[CLExperience]
 
-class BayesianCL(SupervisedTemplate):
+class MASBayesianCL(SupervisedTemplate):
     """Elastic Weight Consolidation (EWC) strategy.
 
     See EWC plugin for details.
@@ -45,7 +47,7 @@ class BayesianCL(SupervisedTemplate):
         model: Module,
         optimizer: Optimizer,
         criterion,
-        plugins: List[SupervisedPlugin],
+        plugins: Optional[List[SupervisedPlugin]]=None,
         task_type = 'classification',
         num_test_repeats = 5,
         train_mb_size: int = 1,
@@ -54,6 +56,7 @@ class BayesianCL(SupervisedTemplate):
         device=None,        
         evaluator: EvaluationPlugin = default_evaluator,
         eval_every=-1,
+        beta=1.0,
         **base_kwargs
     ):
         """Init.
@@ -89,6 +92,13 @@ class BayesianCL(SupervisedTemplate):
         :param base_kwargs: any additional
             :class:`~avalanche.training.BaseTemplate` constructor arguments.
         """
+        assert(train_mb_size==1 and eval_mb_size==1)
+        ewc = BTFRMASPlugin()
+        if plugins:
+            plugins.append(ewc)
+        else:
+            plugins = [ewc]
+        
         super().__init__(
             model,
             optimizer,
@@ -104,6 +114,9 @@ class BayesianCL(SupervisedTemplate):
         )
         self.task_type = task_type
         self.num_test_repeats = num_test_repeats
+        self.beta = beta
+        self.lower_threshold = 0.7 #Below this, we don't update importances
+        
     
     def classification_mean_std(self):
         output_list = []
@@ -126,6 +139,47 @@ class BayesianCL(SupervisedTemplate):
     #     p = torch.cat(output_list, 0)
     #     return (p.mean(0), p.std(0))
 
+
+
+    def training_epoch(self, **kwargs):
+        """Training epoch.
+
+        :param kwargs:
+        :return:
+        """
+        for self.mbatch in self.dataloader:
+            if self._stop_training:
+                break
+
+            self._unpack_minibatch()
+            self._before_training_iteration(**kwargs)
+
+            self.optimizer.zero_grad()
+            self.loss = 0
+
+            # Forward
+            self._before_forward(**kwargs)
+            if self.task_type=='classification':
+                preds = self.classification_mean_std()
+            self.mb_output = preds
+            self.certainty = torch.max(preds).item()
+            self._after_forward(**kwargs)
+
+            # Loss & Backward
+            self.loss += self.criterion()
+
+            self._before_backward(**kwargs)
+            self.backward()
+            self._after_backward(**kwargs)
+
+            # Optimization step
+            self._before_update(**kwargs)
+            self.optimizer_step()
+            self._after_update(**kwargs)
+
+            self._after_training_iteration(**kwargs)
+
+
     def eval_epoch(self, **kwargs):
         """Evaluation loop over the current `self.dataloader`."""
         for self.mbatch in self.dataloader:
@@ -137,8 +191,9 @@ class BayesianCL(SupervisedTemplate):
             if self.task_type=='classification':
                 preds = self.classification_mean_std()
 
-            self.mb_output = preds          
-            #self.mb_output = self.forward()
+            self.mb_output = preds       
+   
+
             
             self._after_eval_forward(**kwargs)
             self.loss = self.criterion()

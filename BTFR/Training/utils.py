@@ -7,3 +7,9 @@ def enable_dropout(model):
     for m in model.modules():
         if m.__class__.__name__.startswith('Dropout'):
             m.train()
+
+def init_params(m):
+    if hasattr(m, 'weight'):
+        nn.init.xavier_uniform(m.weight.data)
+    if hasattr(m, 'bias'):
+        m.bias.data = 0.0        
