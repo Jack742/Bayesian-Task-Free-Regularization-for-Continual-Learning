@@ -49,17 +49,23 @@ class BTFREWCPlugin(EWCPlugin):
         super().__init__(ewc_lambda, mode,decay_factor,keep_importance_data)
         #NEW ADDITION
         self.NO_UPDATE = True
+
     def after_training_exp(self, strategy, **kwargs):
+        pass
+
+    def after_training_iteration(self, strategy, **kwargs):
         """
         Compute importances of parameters after each experience.
         """
-        exp_counter = strategy.clock.train_exp_counter
+        
+        #NEW ADDITION
+        exp_counter = strategy.clock.train_exp_iterations
         #NEW ADDITION
         importances = self.compute_importances(
             strategy.model,
             strategy._criterion,
             strategy.optimizer,
-            strategy.experience.dataset,
+            (strategy.mb_x, strategy.mb_y,strategy.mb_task_id),
             strategy.device,
             strategy.train_mb_size,
             strategy.certainty,
@@ -103,8 +109,7 @@ class BTFREWCPlugin(EWCPlugin):
         else:
             self.NO_UPDATE = False
         
-        dataloader = DataLoader(dataset, batch_size=batch_size)
-        for i, batch in enumerate(dataloader):
+            batch = dataset
             # get only input, target and task_id from the batch
             x, y, task_labels = batch[0], batch[1], batch[-1]
             x, y = x.to(device), y.to(device)
@@ -120,11 +125,11 @@ class BTFREWCPlugin(EWCPlugin):
                 assert k1 == k2
                 if p.grad is not None:
                     #NEW ADDITION
-                    imp += (p.grad.data.clone().pow(2)) * (certainty**2 * beta)
+                    imp += (p.grad.data.clone().pow(2)) * ((certainty**2) * beta)
 
         # average over mini batch length
         for _, imp in importances:
-            imp /= float(len(dataloader))
+            imp /= float(len(dataset))
 
         return importances
 
@@ -135,7 +140,7 @@ class BTFREWCPlugin(EWCPlugin):
         importances.
         """
         #NEW ADDITION
-        if not self.NO_UPDATE:         
+        if True:#not self.NO_UPDATE:         
             if self.mode == "separate" or t == 0:
                 self.importances[t] = importances
             elif self.mode == "online":
@@ -146,8 +151,7 @@ class BTFREWCPlugin(EWCPlugin):
                     if k1 is None:
                         self.importances[t].append((k2, curr_imp))
                         continue
-
-                    assert k1 == k2, "Error in importance computation."
+                    assert( k1 == k2, f"Error in importance computation. {k1}||{k2}")
                     #NEW ADDITION
                     self.importances[t].append(
                         (k1, (self.decay_factor * (old_imp*(t-1) + curr_imp)/t))

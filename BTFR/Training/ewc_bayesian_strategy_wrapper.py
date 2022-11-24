@@ -176,7 +176,6 @@ class EWCBayesianCL(SupervisedTemplate):
             self._before_update(**kwargs)
             self.optimizer_step()
             self._after_update(**kwargs)
-
             self._after_training_iteration(**kwargs)
 
 

@@ -10,6 +10,6 @@ def enable_dropout(model):
 
 def init_params(m):
     if hasattr(m, 'weight'):
-        nn.init.xavier_uniform(m.weight.data)
+        nn.init.xavier_uniform_(m.weight.data)
     if hasattr(m, 'bias'):
-        m.bias.data = 0.0        
+        m.bias.data[m.bias.data != 0.0] = 0.0        
