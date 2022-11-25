@@ -9,7 +9,7 @@ from avalanche.training.plugins.strategy_plugin import SupervisedPlugin
 from avalanche.training.utils import copy_params_dict, zerolike_params_dict
 
 
-class MASPlugin(SupervisedPlugin):
+class TFMASPlugin(SupervisedPlugin):
     """
     Memory Aware Synapses (MAS) plugin.
 
@@ -60,50 +60,46 @@ class MASPlugin(SupervisedPlugin):
         # Initialize importance matrix
         importance = dict(zerolike_params_dict(strategy.model))
 
-        if not strategy.experience:
+        if not (strategy.mb_x and strategy.mb_y and strategy.mb_task_id):
             raise ValueError("Current experience is not available")
 
-        if strategy.experience.dataset is None:
-            raise ValueError("Current dataset is not available")
+        # if strategy.experience.dataset is None:
+        #     raise ValueError("Current dataset is not available")
 
         # Do forward and backward pass to accumulate L2-loss gradients
         strategy.model.train()
-        dataloader = DataLoader(
-            strategy.experience.dataset,
-            batch_size=strategy.train_mb_size,
-        )  # type: ignore
 
         # Progress bar
         if self.verbose:
             print("Computing importance")
             dataloader = tqdm(dataloader)
+        #New ADdition
+        batch = (strategy.mb_x, strategy.mb_y, strategy.mb_task_id)
+        # Get batch
+        if len(batch) == 2 or len(batch) == 3:
+            x, _, t = batch[0], batch[1], batch[-1]
+        else:
+            raise ValueError("Batch size is not valid")
 
-        for _, batch in enumerate(dataloader):
-            # Get batch
-            if len(batch) == 2 or len(batch) == 3:
-                x, _, t = batch[0], batch[1], batch[-1]
-            else:
-                raise ValueError("Batch size is not valid")
+        # Move batch to device
+        x = x.to(strategy.device)
 
-            # Move batch to device
-            x = x.to(strategy.device)
+        # Forward pass
+        strategy.model.zero_grad()
+        out = avalanche_forward(strategy.model, x, t)
 
-            # Forward pass
-            strategy.model.zero_grad()
-            out = avalanche_forward(strategy.model, x, t)
+        # Average L2-Norm of the output
+        loss = torch.norm(out, p="fro", dim=1).mean()
+        loss.backward()
 
-            # Average L2-Norm of the output
-            loss = torch.norm(out, p="fro", dim=1).mean()
-            loss.backward()
-
-            # Accumulate importance
-            for name, param in strategy.model.named_parameters():
-                if param.requires_grad:
-                    # In multi-head architectures, the gradient is going
-                    # to be None for all the heads different from the
-                    # current one.
-                    if param.grad is not None:
-                        importance[name] += param.grad.abs() * len(batch)
+        # Accumulate importance
+        for name, param in strategy.model.named_parameters():
+            if param.requires_grad:
+                # In multi-head architectures, the gradient is going
+                # to be None for all the heads different from the
+                # current one.
+                if param.grad is not None:
+                    importance[name] += param.grad.abs() * len(batch)
 
         # Normalize importance
         importance = {
@@ -117,7 +113,8 @@ class MASPlugin(SupervisedPlugin):
         if strategy.is_eval:            
             return
         # Check if the task is not the first
-        exp_counter = strategy.clock.train_exp_counter
+        #NEW ADDITION
+        exp_counter = strategy.clock.train_exp_iteration
         if exp_counter == 0:
             return
 
@@ -151,6 +148,9 @@ class MASPlugin(SupervisedPlugin):
             self.importance = dict(zerolike_params_dict(strategy.model))
 
     def after_training_exp(self, strategy, **kwargs):
+        pass
+
+    def after_training_iteration(self, strategy, **kwargs):
         self.params = dict(copy_params_dict(strategy.model))
 
         # Check if previous importance is available

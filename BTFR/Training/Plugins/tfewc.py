@@ -98,7 +98,8 @@ class TFEWCPlugin(SupervisedPlugin):
             raise ValueError("Wrong EWC mode.")
 
         strategy.loss += self.ewc_lambda * penalty
-
+    
+    #NEW ADDITION
     def after_training_exp(self, strategy, **kwargs):
         pass
 

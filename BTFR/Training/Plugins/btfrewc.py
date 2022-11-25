@@ -139,30 +139,29 @@ class BTFREWCPlugin(EWCPlugin):
         Update importance for each parameter based on the currently computed
         importances.
         """
-        #NEW ADDITION
-        if True:#not self.NO_UPDATE:         
-            if self.mode == "separate" or t == 0:
-                self.importances[t] = importances
-            elif self.mode == "online":
-                for (k1, old_imp), (k2, curr_imp) in itertools.zip_longest(
-                    self.importances[t - 1], importances, fillvalue=(None, None),
-                ):
-                    # Add new module importances to the importances value (New head)
-                    if k1 is None:
-                        self.importances[t].append((k2, curr_imp))
-                        continue
-                    assert( k1 == k2, f"Error in importance computation. {k1}||{k2}")
-                    #NEW ADDITION
-                    self.importances[t].append(
-                        (k1, (self.decay_factor * (old_imp*(t-1) + curr_imp)/t))
-                    )
+      
+        if self.mode == "separate" or t == 0:
+            self.importances[t] = importances
+        elif self.mode == "online":
+            for (k1, old_imp), (k2, curr_imp) in itertools.zip_longest(
+                self.importances[t - 1], importances, fillvalue=(None, None),
+            ):
+                # Add new module importances to the importances value (New head)
+                if k1 is None:
+                    self.importances[t].append((k2, curr_imp))
+                    continue
+                assert( k1 == k2, f"Error in importance computation. {k1}||{k2}")
+                #NEW ADDITION                
+                self.importances[t].append(
+                    (k1, (self.decay_factor * (old_imp*(t-1) + curr_imp)/t))
+                )
 
-                # clear previous parameter importances
-                if t > 0 and (not self.keep_importance_data):
-                    del self.importances[t - 1]
+            # clear previous parameter importances
+            if t > 0 and (not self.keep_importance_data):
+                del self.importances[t - 1]
 
-            else:
-                raise ValueError("Wrong EWC mode.")
+        else:
+            raise ValueError("Wrong EWC mode.")
 
 
 ParamDict = Dict[str, Tensor]
