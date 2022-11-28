@@ -9,7 +9,7 @@ from avalanche.training.plugins.strategy_plugin import SupervisedPlugin
 from avalanche.training.utils import copy_params_dict, zerolike_params_dict
 
 
-class BTFRMASPlugin(SupervisedPlugin):
+class TEMPBTFRMASPlugin(SupervisedPlugin):
     """
     Memory Aware Synapses (MAS) plugin.
 
@@ -54,22 +54,21 @@ class BTFRMASPlugin(SupervisedPlugin):
 
         # Progress bar
         self.verbose = verbose
-        
-        #NEW ADDITION
-        self.NO_UPDATE = True
 
     def _get_importance(self, strategy):
 
         # Initialize importance matrix
         importance = dict(zerolike_params_dict(strategy.model))
-        #NEW ADDITION
         if strategy.certainty < strategy.lower_threshold:
             return importance
+        # if strategy.experience.dataset is None:
+        #     raise ValueError("Current dataset is not available")
 
         # Do forward and backward pass to accumulate L2-loss gradients
         strategy.model.train()
-        
 
+
+        #New ADdition
         batch = (strategy.mb_x, strategy.mb_y, strategy.mb_task_id)
         # Get batch
         if len(batch) == 2 or len(batch) == 3:
@@ -94,7 +93,6 @@ class BTFRMASPlugin(SupervisedPlugin):
                 # In multi-head architectures, the gradient is going
                 # to be None for all the heads different from the
                 # current one.
-                #NEW ADDITION
                 if param.grad is not None:
                     importance[name] += param.grad.abs() * len(batch) * ((strategy.certainty **2) *strategy.beta)
 
@@ -137,6 +135,7 @@ class BTFRMASPlugin(SupervisedPlugin):
         # Initialize Fisher information weight importance
         if not self.importance:
             self.importance = dict(zerolike_params_dict(strategy.model))
+
     def after_training_exp(self, strategy, **kwargs):
         pass
 
@@ -149,12 +148,11 @@ class BTFRMASPlugin(SupervisedPlugin):
 
         # Get importance
         curr_importance = self._get_importance(strategy)
-
+        
         if not hasattr(self,'num_updates'):
             self.num_updates = 0
         # Update importance
         for name in self.importance.keys():
-            #NEW ADDITION
             self.importance[name] = (
                 ((self.alpha * self.importance[name])*self.num_updates)
                 + (1 - self.alpha) * curr_importance[name])/(self.num_updates+1)

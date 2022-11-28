@@ -60,19 +60,13 @@ class TFMASPlugin(SupervisedPlugin):
         # Initialize importance matrix
         importance = dict(zerolike_params_dict(strategy.model))
 
-        if not (strategy.mb_x and strategy.mb_y and strategy.mb_task_id):
-            raise ValueError("Current experience is not available")
-
         # if strategy.experience.dataset is None:
         #     raise ValueError("Current dataset is not available")
 
         # Do forward and backward pass to accumulate L2-loss gradients
         strategy.model.train()
 
-        # Progress bar
-        if self.verbose:
-            print("Computing importance")
-            dataloader = tqdm(dataloader)
+
         #New ADdition
         batch = (strategy.mb_x, strategy.mb_y, strategy.mb_task_id)
         # Get batch
@@ -101,12 +95,6 @@ class TFMASPlugin(SupervisedPlugin):
                 if param.grad is not None:
                     importance[name] += param.grad.abs() * len(batch)
 
-        # Normalize importance
-        importance = {
-            name: importance[name] / len(dataloader)
-            for name in importance.keys()
-        }
-
         return importance
 
     def before_backward(self, strategy, **kwargs):
@@ -114,7 +102,7 @@ class TFMASPlugin(SupervisedPlugin):
             return
         # Check if the task is not the first
         #NEW ADDITION
-        exp_counter = strategy.clock.train_exp_iteration
+        exp_counter = strategy.clock.train_exp_iterations
         if exp_counter == 0:
             return
 

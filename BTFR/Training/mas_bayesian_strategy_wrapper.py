@@ -31,7 +31,7 @@ from avalanche.models.generator import MlpVAE, VAE_loss
 from avalanche.logging import InteractiveLogger
 from avalanche.benchmarks import CLExperience, CLStream
 from .utils import enable_dropout
-from .Plugins import BTFRMASPlugin
+from .Plugins import BTFRMASPlugin, TEMPBTFRMASPlugin
 
 ExpSequence = Iterable[CLExperience]
 
@@ -93,7 +93,7 @@ class MASBayesianCL(SupervisedTemplate):
             :class:`~avalanche.training.BaseTemplate` constructor arguments.
         """
         assert(train_mb_size==1 and eval_mb_size==1)
-        ewc = BTFRMASPlugin()
+        ewc = TEMPBTFRMASPlugin()
         if plugins:
             plugins.append(ewc)
         else:

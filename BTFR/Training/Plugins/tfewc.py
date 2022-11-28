@@ -166,10 +166,6 @@ class TFEWCPlugin(SupervisedPlugin):
             if p.grad is not None:
                 imp += p.grad.data.clone().pow(2)
 
-        # average over mini batch length
-        for _, imp in importances:
-            imp /= float(len(dataset))
-
         return importances
 
     @torch.no_grad()

@@ -127,10 +127,6 @@ class BTFREWCPlugin(EWCPlugin):
                     #NEW ADDITION
                     imp += (p.grad.data.clone().pow(2)) * ((certainty**2) * beta)
 
-        # average over mini batch length
-        for _, imp in importances:
-            imp /= float(len(dataset))
-
         return importances
 
     @torch.no_grad()
