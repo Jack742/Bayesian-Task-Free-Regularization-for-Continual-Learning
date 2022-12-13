@@ -1,0 +1,13 @@
+[2022-11-29 14:05:36 Info] Script args: Namespace(dataset='ds_permuted_mnist', nn_arch='mnist_compare', logname='testingbgd', results_dir='res', seed=622002160, num_workers=8, num_epochs=1, batch_size=1, pruning_percents=[], train_mc_iters=10, std_init=0.06, mean_eta=1, permanent_prune_on_epoch=-1, permanent_prune_on_epoch_percent=90, test_freq=1, contpermuted_beta=3, optimizer='bgd', optimizer_params='{}', inference_mc=True, inference_map=True, inference_committee=True, inference_aggsoftmax=True, inference_initstd=True, committee_size=10, test_mc_iters=10, init_params=['{"bias_type":', '"xavier",', '"conv_type":', '"xavier",', '"bn_init":', '"01"}'], desc=['BGD', 'on', 'permuted', 'mnist'], bw_to_rgb=False, permuted_offset=False, labels_trick=False, num_of_permutations=5, iterations_per_virtual_epc=468, separate_labels_space=False, permute_seed=123456)
+[2022-11-29 14:05:36 Info] Computer name: DESKTOP-G99104T with pytorch version: 1.13.0+cu116
+[2022-11-29 14:05:37 Info] Transformed model to CUDA
+[2022-11-29 14:05:37 Info] Initialized 0 Conv2d layers using nn.init.xavier_normal_
+[2022-11-29 14:05:38 Info] Initialized 2 linear layers using xavier
+[2022-11-29 14:05:38 Info] Initialized 0 bias conv2d layers using nn.init.xavier.noraml_
+[2022-11-29 14:05:38 Info] Initialized 2 bias linear layers using xavier
+[2022-11-29 14:05:38 Info] Initialized 0 BN layers using weight=1 and bias=0
+[2022-11-29 14:05:38 Info] BGD params: {'mean_eta': 1, 'std_init': 0.06, 'mc_iters': 10}
+[2022-11-29 14:05:38 Info] Inference method: {'map', 'init_std', 'agg_softmax', 'committee', 'test_mc'}
+[2022-11-29 14:05:38 Info] Number of parameters in the model is 407,050
+[2022-11-29 14:05:38 Info] Criterion parameters: type=<class 'torch.nn.modules.loss.CrossEntropyLoss'>
+[2022-11-29 14:05:38 Info] Running training from epoch 1 to epoch 1

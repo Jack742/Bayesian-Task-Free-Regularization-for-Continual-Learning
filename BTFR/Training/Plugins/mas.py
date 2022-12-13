@@ -117,7 +117,7 @@ class MASPlugin(SupervisedPlugin):
         if strategy.is_eval:            
             return
         # Check if the task is not the first
-        exp_counter = strategy.clock.train_exp_counter
+        exp_counter = strategy.clock.train_iterations
         if exp_counter == 0:
             return
 

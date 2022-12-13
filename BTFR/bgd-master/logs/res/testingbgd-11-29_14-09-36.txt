@@ -1,0 +1,61 @@
+[2022-11-29 14:09:36 Info] Script args: Namespace(dataset='ds_permuted_mnist', nn_arch='mnist_compare', logname='testingbgd', results_dir='res', seed=624405835, num_workers=8, num_epochs=400, batch_size=1, pruning_percents=[], train_mc_iters=10, std_init=0.06, mean_eta=1, permanent_prune_on_epoch=-1, permanent_prune_on_epoch_percent=90, test_freq=1, contpermuted_beta=3, optimizer='bgd', optimizer_params='{}', inference_mc=True, inference_map=True, inference_committee=True, inference_aggsoftmax=True, inference_initstd=True, committee_size=10, test_mc_iters=10, init_params=['{"bias_type":', '"xavier",', '"conv_type":', '"xavier",', '"bn_init":', '"01"}'], desc=['BGD', 'on', 'permuted', 'mnist'], bw_to_rgb=False, permuted_offset=False, labels_trick=False, num_of_permutations=5, iterations_per_virtual_epc=468, separate_labels_space=False, permute_seed=123456)
+[2022-11-29 14:09:36 Info] Computer name: DESKTOP-G99104T with pytorch version: 1.13.0+cu116
+[2022-11-29 14:09:37 Info] Transformed model to CUDA
+[2022-11-29 14:09:37 Info] Initialized 0 Conv2d layers using nn.init.xavier_normal_
+[2022-11-29 14:09:38 Info] Initialized 2 linear layers using xavier
+[2022-11-29 14:09:38 Info] Initialized 0 bias conv2d layers using nn.init.xavier.noraml_
+[2022-11-29 14:09:38 Info] Initialized 2 bias linear layers using xavier
+[2022-11-29 14:09:38 Info] Initialized 0 BN layers using weight=1 and bias=0
+[2022-11-29 14:09:38 Info] BGD params: {'mean_eta': 1, 'std_init': 0.06, 'mc_iters': 10}
+[2022-11-29 14:09:38 Info] Inference method: {'map', 'init_std', 'committee', 'test_mc', 'agg_softmax'}
+[2022-11-29 14:09:38 Info] Number of parameters in the model is 407,050
+[2022-11-29 14:09:38 Info] Criterion parameters: type=<class 'torch.nn.modules.loss.CrossEntropyLoss'>
+[2022-11-29 14:09:38 Info] Running training from epoch 1 to epoch 400
+[2022-11-29 14:09:38 Info] Training epoch number 1 with dataset number 0
+[2022-11-29 14:09:44 Info] Epoch 1, train set, Iter 100 current average loss 2.590643981426953 current average acc 0.0%
+[2022-11-29 14:09:46 Info] Epoch 1, train set, Iter 200 current average loss 2.447167717620735 current average acc 0.0%
+[2022-11-29 14:09:48 Info] Epoch 1, train set, Iter 300 current average loss 2.325125018815191 current average acc 0.0%
+[2022-11-29 14:09:50 Info] Epoch 1, train set, Iter 400 current average loss 2.2224292429573698 current average acc 0.0%
+[2022-11-29 14:09:52 Info] Epoch 1, train set, Iter 500 current average loss 2.129672841833542 current average acc 0.0%
+[2022-11-29 14:09:55 Info] Epoch 1, train set, Iter 600 current average loss 2.0323624238843863 current average acc 0.0%
+[2022-11-29 14:09:57 Info] Epoch 1, train set, Iter 700 current average loss 1.9550495900245717 current average acc 0.0%
+[2022-11-29 14:09:59 Info] Epoch 1, train set, Iter 800 current average loss 1.8999123094626764 current average acc 0.0%
+[2022-11-29 14:10:01 Info] Epoch 1, train set, Iter 900 current average loss 1.833009018211115 current average acc 0.0%
+[2022-11-29 14:10:03 Info] Epoch 1, train set, Iter 1000 current average loss 1.779738440290284 current average acc 0.0%
+[2022-11-29 14:10:06 Info] Epoch 1, train set, Iter 1100 current average loss 1.723607433107097 current average acc 0.0%
+[2022-11-29 14:10:08 Info] Epoch 1, train set, Iter 1200 current average loss 1.672193381526147 current average acc 0.0%
+[2022-11-29 14:10:10 Info] Epoch 1, train set, Iter 1300 current average loss 1.6262511107224427 current average acc 0.0%
+[2022-11-29 14:10:12 Info] Epoch 1, train set, Iter 1400 current average loss 1.5876522427497435 current average acc 0.0%
+[2022-11-29 14:10:15 Info] Epoch 1, train set, Iter 1500 current average loss 1.538254714811715 current average acc 0.0%
+[2022-11-29 14:10:17 Info] Epoch 1, train set, Iter 1600 current average loss 1.4999162139646278 current average acc 0.0%
+[2022-11-29 14:10:19 Info] Epoch 1, train set, Iter 1700 current average loss 1.4599484624314774 current average acc 0.0%
+[2022-11-29 14:10:22 Info] Epoch 1, train set, Iter 1800 current average loss 1.431690675846361 current average acc 0.0%
+[2022-11-29 14:10:24 Info] Epoch 1, train set, Iter 1900 current average loss 1.405126468973362 current average acc 0.0%
+[2022-11-29 14:10:26 Info] Epoch 1, train set, Iter 2000 current average loss 1.3765300745211773 current average acc 0.0%
+[2022-11-29 14:10:29 Info] Epoch 1, train set, Iter 2100 current average loss 1.34553737825019 current average acc 0.0%
+[2022-11-29 14:10:31 Info] Epoch 1, train set, Iter 2200 current average loss 1.3128654945316625 current average acc 0.0%
+[2022-11-29 14:10:33 Info] Epoch 1, train set, Iter 2300 current average loss 1.286996381067255 current average acc 0.0%
+[2022-11-29 14:10:35 Info] Epoch 1, train set, Iter 2400 current average loss 1.265222636497206 current average acc 0.0%
+[2022-11-29 14:10:38 Info] Epoch 1, train set, Iter 2500 current average loss 1.2484095236132071 current average acc 0.0%
+[2022-11-29 14:10:40 Info] Epoch 1, train set, Iter 2600 current average loss 1.2222427587426086 current average acc 0.0%
+[2022-11-29 14:10:42 Info] Epoch 1, train set, Iter 2700 current average loss 1.2022421273972406 current average acc 0.0%
+[2022-11-29 14:10:44 Info] Epoch 1, train set, Iter 2800 current average loss 1.1852284790769831 current average acc 0.0%
+[2022-11-29 14:10:47 Info] Epoch 1, train set, Iter 2900 current average loss 1.1690194040650819 current average acc 0.0%
+[2022-11-29 14:10:49 Info] Epoch 1, train set, Iter 3000 current average loss 1.1528095066659159 current average acc 0.0%
+[2022-11-29 14:10:51 Info] Epoch 1, train set, Iter 3100 current average loss 1.1340221693163468 current average acc 0.0%
+[2022-11-29 14:10:53 Info] Epoch 1, train set, Iter 3200 current average loss 1.121224612275927 current average acc 0.0%
+[2022-11-29 14:10:56 Info] Epoch 1, train set, Iter 3300 current average loss 1.1068823936238488 current average acc 0.0%
+[2022-11-29 14:10:58 Info] Epoch 1, train set, Iter 3400 current average loss 1.0963170589444489 current average acc 0.0%
+[2022-11-29 14:11:00 Info] Epoch 1, train set, Iter 3500 current average loss 1.081710182314931 current average acc 0.0%
+[2022-11-29 14:11:02 Info] Epoch 1, train set, Iter 3600 current average loss 1.0672175520712026 current average acc 0.0%
+[2022-11-29 14:11:05 Info] Epoch 1, train set, Iter 3700 current average loss 1.054977426446796 current average acc 0.0%
+[2022-11-29 14:11:07 Info] Epoch 1, train set, Iter 3800 current average loss 1.0430838022406572 current average acc 0.0%
+[2022-11-29 14:11:09 Info] Epoch 1, train set, Iter 3900 current average loss 1.0311484280360212 current average acc 0.0%
+[2022-11-29 14:11:12 Info] Epoch 1, train set, Iter 4000 current average loss 1.0179178280961578 current average acc 0.0%
+[2022-11-29 14:11:14 Info] Epoch 1, train set, Iter 4100 current average loss 1.0041659686670417 current average acc 0.0%
+[2022-11-29 14:11:16 Info] Epoch 1, train set, Iter 4200 current average loss 0.9982141154145016 current average acc 0.0%
+[2022-11-29 14:11:19 Info] Epoch 1, train set, Iter 4300 current average loss 0.9877016306163207 current average acc 0.0%
+[2022-11-29 14:11:21 Info] Epoch 1, train set, Iter 4400 current average loss 0.9773702363108812 current average acc 0.0%
+[2022-11-29 14:11:23 Info] Epoch 1, train set, Iter 4500 current average loss 0.9651699255636126 current average acc 0.0%
+[2022-11-29 14:11:25 Info] Epoch 1, train set, Iter 4600 current average loss 0.9517467662887107 current average acc 0.0%
+[2022-11-29 14:11:28 Info] Epoch 1, train set, Iter 4700 current average loss 0.9451329382315014 current average acc 0.0%

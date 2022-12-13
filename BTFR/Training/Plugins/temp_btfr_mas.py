@@ -29,7 +29,7 @@ class TEMPBTFRMASPlugin(SupervisedPlugin):
     """
 
     def __init__(
-        self, lambda_reg: float = 1.0, alpha: float = 0.5, verbose=False
+        self, k: int=2,lambda_reg: float = 1.0, alpha: float = 0.5, verbose=False
     ):
         """
         :param lambda_reg: hyperparameter weighting the penalty term
@@ -47,7 +47,8 @@ class TEMPBTFRMASPlugin(SupervisedPlugin):
         # Regularization Parameters
         self._lambda = lambda_reg
         self.alpha = alpha
-
+        self.k = k
+        
         # Model parameters
         self.params: Union[Dict, None] = None
         self.importance: Union[Dict, None] = None
@@ -94,7 +95,7 @@ class TEMPBTFRMASPlugin(SupervisedPlugin):
                 # to be None for all the heads different from the
                 # current one.
                 if param.grad is not None:
-                    importance[name] += param.grad.abs() * len(batch) * ((strategy.certainty **2) *strategy.beta)
+                    importance[name] += param.grad.abs() * len(batch) * ((strategy.certainty **self.k) *strategy.beta)
 
         return importance
 
@@ -103,7 +104,7 @@ class TEMPBTFRMASPlugin(SupervisedPlugin):
             return
         # Check if the task is not the first
         #NEW ADDITION
-        exp_counter = strategy.clock.train_exp_iterations
+        exp_counter = strategy.clock.train_iterations
         if exp_counter == 0:
             return
 

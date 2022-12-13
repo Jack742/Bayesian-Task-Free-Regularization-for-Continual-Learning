@@ -50,6 +50,7 @@ class BayesianCL(SupervisedTemplate):
         num_test_repeats = 5,
         train_mb_size: int = 1,
         train_epochs: int = 1,
+        beta=1.0,
         eval_mb_size: int = None,
         device=None,        
         evaluator: EvaluationPlugin = default_evaluator,
@@ -105,6 +106,8 @@ class BayesianCL(SupervisedTemplate):
         self.task_type = task_type
         self.num_test_repeats = num_test_repeats
         self.last_sample = None
+        self.beta =beta
+        self.lower_threshold = 0.7
     
     def classification_mean_std(self):
         output_list = []
@@ -144,7 +147,9 @@ class BayesianCL(SupervisedTemplate):
 
                 # Forward
                 self._before_forward(**kwargs)
-                self.mb_output = self.forward()
+                preds = self.classification_mean_std()
+                self.mb_output = preds
+                self.certainty = torch.max(preds).item()
                 self._after_forward(**kwargs)
 
                 # Loss & Backward

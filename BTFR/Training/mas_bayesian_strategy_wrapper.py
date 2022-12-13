@@ -57,6 +57,9 @@ class MASBayesianCL(SupervisedTemplate):
         evaluator: EvaluationPlugin = default_evaluator,
         eval_every=-1,
         beta=1.0,
+        alpha=0.5,
+        lambda_=1.0,
+        k=2,
         **base_kwargs
     ):
         """Init.
@@ -93,7 +96,7 @@ class MASBayesianCL(SupervisedTemplate):
             :class:`~avalanche.training.BaseTemplate` constructor arguments.
         """
         assert(train_mb_size==1 and eval_mb_size==1)
-        ewc = TEMPBTFRMASPlugin()
+        ewc = TEMPBTFRMASPlugin(k=k,alpha=alpha,lambda_reg=lambda_)
         if plugins:
             plugins.append(ewc)
         else:
@@ -115,6 +118,8 @@ class MASBayesianCL(SupervisedTemplate):
         self.task_type = task_type
         self.num_test_repeats = num_test_repeats
         self.beta = beta
+
+
         self.lower_threshold = 0.7 #Below this, we don't update importances
         
     

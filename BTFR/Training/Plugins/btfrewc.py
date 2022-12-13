@@ -50,6 +50,37 @@ class BTFREWCPlugin(EWCPlugin):
         #NEW ADDITION
         self.NO_UPDATE = True
 
+    def before_backward(self, strategy, **kwargs):
+        """
+        Compute EWC penalty and add it to the loss.
+        """
+        #NEW ADDITION
+        exp_counter = strategy.clock.train_iterations
+        if exp_counter == 0:
+            return
+
+        penalty = torch.tensor(0).float().to(strategy.device)
+
+        if self.mode == "separate":
+            raise ValueError("TF-EWC Must be 'online'")
+        elif self.mode == "online":
+            prev_exp = exp_counter - 1
+            for (_, cur_param), (_, saved_param), (_, imp) in zip(
+                strategy.model.named_parameters(),
+                self.saved_params[prev_exp],
+                self.importances[prev_exp],
+            ):
+                # dynamic models may add new units
+                # new units are ignored by the regularization
+                n_units = saved_param.shape[0]
+                cur_param = cur_param[:n_units]
+                penalty += (imp * (cur_param - saved_param).pow(2)).sum()
+        else:
+            raise ValueError("Wrong EWC mode.")
+
+        strategy.loss += self.ewc_lambda * penalty
+
+
     def after_training_exp(self, strategy, **kwargs):
         pass
 
@@ -59,7 +90,7 @@ class BTFREWCPlugin(EWCPlugin):
         """
         
         #NEW ADDITION
-        exp_counter = strategy.clock.train_exp_iterations
+        exp_counter = strategy.clock.train_iterations
         #NEW ADDITION
         importances = self.compute_importances(
             strategy.model,
@@ -139,6 +170,9 @@ class BTFREWCPlugin(EWCPlugin):
         if self.mode == "separate" or t == 0:
             self.importances[t] = importances
         elif self.mode == "online":
+            if not hasattr(self, 'num_updates'):
+                self.num_updates = 0
+
             for (k1, old_imp), (k2, curr_imp) in itertools.zip_longest(
                 self.importances[t - 1], importances, fillvalue=(None, None),
             ):
@@ -149,9 +183,9 @@ class BTFREWCPlugin(EWCPlugin):
                 assert( k1 == k2, f"Error in importance computation. {k1}||{k2}")
                 #NEW ADDITION                
                 self.importances[t].append(
-                    (k1, (self.decay_factor * (old_imp*(t-1) + curr_imp)/t))
+                    (k1, (self.decay_factor * (old_imp*(self.num_updates) + curr_imp)/(self.num_updates+1)))
                 )
-
+            self.num_updates+=1
             # clear previous parameter importances
             if t > 0 and (not self.keep_importance_data):
                 del self.importances[t - 1]

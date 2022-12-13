@@ -68,13 +68,14 @@ class TFEWCPlugin(SupervisedPlugin):
 
         self.saved_params = defaultdict(list)
         self.importances = defaultdict(list)
+        self.just_finished_eval=False
 
     def before_backward(self, strategy, **kwargs):
         """
         Compute EWC penalty and add it to the loss.
         """
         #NEW ADDITION
-        exp_counter = strategy.clock.train_exp_iterations
+        exp_counter = strategy.clock.train_iterations
         if exp_counter == 0:
             return
 
@@ -109,7 +110,7 @@ class TFEWCPlugin(SupervisedPlugin):
         Compute importances of parameters after each experience.
         """
         #NEW ADDITION
-        exp_counter = strategy.clock.train_exp_iterations
+        exp_counter = strategy.clock.train_iterations
         #NEW ADDITION
         importances = self.compute_importances(
             strategy.model,
@@ -174,7 +175,8 @@ class TFEWCPlugin(SupervisedPlugin):
         Update importance for each parameter based on the currently computed
         importances.
         """
-
+        # if self.just_finished_eval==True:
+        #     t = 
         if self.mode == "separate" or t == 0:
             self.importances[t] = importances
         elif self.mode == "online":
@@ -187,7 +189,7 @@ class TFEWCPlugin(SupervisedPlugin):
                     continue
 
                 assert k1 == k2, "Error in importance computation."
-
+                
                 self.importances[t].append(
                     (k1, (self.decay_factor * old_imp + curr_imp))
                 )
@@ -198,6 +200,10 @@ class TFEWCPlugin(SupervisedPlugin):
 
         else:
             raise ValueError("Wrong EWC mode.")
+        tmp = -1
+
+    # def after_eval(self, **kwargs):
+    #     self.just_finished_eval = True
 
 
 ParamDict = Dict[str, Tensor]

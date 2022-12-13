@@ -102,7 +102,7 @@ class TFMASPlugin(SupervisedPlugin):
             return
         # Check if the task is not the first
         #NEW ADDITION
-        exp_counter = strategy.clock.train_exp_iterations
+        exp_counter = strategy.clock.train_iterations
         if exp_counter == 0:
             return
 
