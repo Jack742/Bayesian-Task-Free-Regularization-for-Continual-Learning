@@ -49,7 +49,7 @@ class EWCBayesianCL(SupervisedTemplate):
         criterion,
         plugins: Optional[List[SupervisedPlugin]]=None,
         task_type = 'classification',
-        num_test_repeats = 5,
+        n_model_reruns = 5,
         train_mb_size: int = 1,
         train_epochs: int = 1,
         eval_mb_size: int = None,
@@ -113,17 +113,17 @@ class EWCBayesianCL(SupervisedTemplate):
             **base_kwargs
         )
         self.task_type = task_type
-        self.num_test_repeats = num_test_repeats
+        self.n_model_reruns = n_model_reruns
         self.beta = beta
         self.lower_threshold = 0.7 #Below this, we don't update importances
         
     
     def classification_mean_std(self):
         output_list = []
-        for _ in range(self.num_test_repeats):     
+        for _ in range(self.n_model_reruns):     
             output_list.append(softmax(self.forward()))
         assert(len(output_list[0][0])==10)
-        z = torch.cat(output_list,-1).view(-1, len(output_list[0][0])).split(self.num_test_repeats)
+        z = torch.cat(output_list,-1).view(-1, len(output_list[0][0])).split(self.n_model_reruns)
         preds = []
         
         for each in z:
@@ -134,7 +134,7 @@ class EWCBayesianCL(SupervisedTemplate):
     # def regression_mean_std(self):
     # """MAY BE BROKEN, CHECK THIS!!!"""
     #     output_list = []
-    #     for _ in range(self.num_test_repeats):
+    #     for _ in range(self.n_model_reruns):
     #         output_list.append(self.forward())
     #     p = torch.cat(output_list, 0)
     #     return (p.mean(0), p.std(0))

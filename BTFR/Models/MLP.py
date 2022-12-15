@@ -1,18 +1,80 @@
-import torch
+################################################################################
+# Copyright (c) 2021 ContinualAI.                                              #
+# Copyrights licensed under the MIT License.                                   #
+# See the accompanying LICENSE file for terms.                                 #
+#                                                                              #
+# Date: 1-05-2020                                                              #
+# Author(s): Vincenzo Lomonaco, Antonio Carta                                  #
+# E-mail: contact@continualai.org                                              #
+# Website: avalanche.continualai.org                                           #
+################################################################################
+
 import torch.nn as nn
 
-class MCDropout_MLP(nn.Module):
-    def __init__(self, in_features: int, out_features: int, hidden_features:tuple) -> None:
-        super(MCDropout_MLP, self).__init__()
-        self.l1 = nn.Linear(in_features, hidden_features[0])
-        self.l2 = nn.Linear(hidden_features[0], hidden_features[1])        
-        self.l3 = nn.Linear(hidden_features[1], out_features)
-        self.ReLu = nn.ReLU()
-        self.drop = nn.Dropout(p=0.5)
-    
-    def forward(self,x: torch.Tensor) -> torch.Tensor:
-        x = self.ReLu(self.drop(self.l1(x)))
-        x = self.ReLu(self.drop(self.l2(x)))
-        x = self.l3(x)
+class SimpleMLP(nn.Module):
+    """
+    Multi-Layer Perceptron with custom parameters.
+    It can be configured to have multiple layers and dropout.
+
+    **Example**::
+
+        >>> from avalanche.models import SimpleMLP
+        >>> n_classes = 10 # e.g. MNIST
+        >>> model = SimpleMLP(n_classes=n_classes)
+        >>> print(model) # View model details
+    """
+
+    def __init__(
+        self,
+        n_classes=10,
+        input_size=28 * 28,
+        hidden_size=400,
+        hidden_layers=2,
+        drop_rate=0.5,
+    ):
+        """
+        :param n_classes: output size
+        :param input_size: input size
+        :param hidden_size: hidden layer size
+        :param hidden_layers: number of hidden layers
+        :param drop_rate: dropout rate. 0 to disable
+        """
+        super().__init__()
+
+        layers = nn.Sequential(
+            *(
+                nn.Linear(input_size, hidden_size),
+                nn.ReLU(inplace=True),
+                nn.Dropout(p=drop_rate),
+            )
+        )
+        for layer_idx in range(hidden_layers - 1):
+            layers.add_module(
+                f"fc{layer_idx + 1}",
+                nn.Sequential(
+                    *(
+                        nn.Linear(hidden_size, hidden_size),
+                        nn.ReLU(inplace=True),
+                        nn.Dropout(p=drop_rate),
+                    )
+                ),
+            )
+
+        self.features = nn.Sequential(*layers)
+        self.classifier = nn.Linear(hidden_size, n_classes)
+        self._input_size = input_size
+
+    def forward(self, x):
+        x = x.contiguous()
+        x = x.view(x.size(0), self._input_size)
+        x = self.features(x)
+        x = self.classifier(x)
         return x
 
+    def get_features(self, x):
+        x = x.contiguous()
+        x = x.view(x.size(0), self._input_size)
+        x = self.features(x)
+        return x
+
+__all__ = ["SimpleMLP"]

@@ -1,0 +1,10 @@
+{
+    "strategy_list":[
+        "ewcbase","ewconline","btfr_ewc_labelled","tfewc","btfr_ewc",
+        "masbase","btfr_mas_labelled",
+        "tfmas","btfr_mas","tfcl","bgd"
+    ],
+    "n_model_reruns": 10,
+    "n_experiences": 10,
+    "experiment":"pmnist"
+}

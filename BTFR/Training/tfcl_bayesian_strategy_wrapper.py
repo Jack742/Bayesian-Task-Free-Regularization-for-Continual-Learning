@@ -47,7 +47,7 @@ class TFCLBayesianCL(SupervisedTemplate):
         criterion,
         plugins: List[SupervisedPlugin] = None,
         task_type = 'classification',
-        num_test_repeats = 5,
+        n_model_reruns = 5,
         train_mb_size: int = 1,
         train_epochs: int = 1,
         eval_mb_size: int = None,
@@ -103,7 +103,7 @@ class TFCLBayesianCL(SupervisedTemplate):
             **base_kwargs
         )
         self.task_type = task_type
-        self.num_test_repeats = num_test_repeats
+        self.num_test_repeats = n_model_reruns
         self.last_sample = None
         self.beta =1.0
         self.lower_threshold = 0.7
